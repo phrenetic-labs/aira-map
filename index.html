@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>System-1 Patch Map</title>
+<meta name="theme-color" content="#080b0a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root {
+  --bg:#080b0a; --panel:#0e1311; --line:#1d2622; --line2:#2a3630;
+  --green:#3dffa0; --green-dim:#1e9b60; --amber:#ffb13d;
+  --text:#e6f2ea; --mut:#6d7f76;
+  --disp:'Chakra Petch','Avenir Next',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,monospace;
+}
+* { box-sizing:border-box; margin:0; -webkit-tap-highlight-color:transparent; }
+body { background:var(--bg); }
+.app { min-height:100vh; background:var(--bg); color:var(--text);
+  font-family:var(--disp); padding:16px 14px calc(48px + env(safe-area-inset-bottom));
+  max-width:760px; margin:0 auto; }
+
+.hd { border-bottom:2px solid var(--green); padding-bottom:10px; margin-bottom:14px; }
+.hd h1 { font-size:clamp(22px,6vw,30px); font-weight:700; letter-spacing:.14em; }
+.hd h1 span { color:var(--green); }
+.hd p { font-family:var(--mono); font-size:11px; color:var(--mut);
+  letter-spacing:.06em; margin-top:4px; }
+
+.gtabs { display:flex; gap:2px; overflow-x:auto; margin-bottom:10px;
+  border-bottom:1px solid var(--line); scrollbar-width:none; }
+.gtabs::-webkit-scrollbar { display:none; }
+.gtab { flex:0 0 auto; background:none; border:none; border-bottom:2px solid transparent;
+  color:var(--mut); font-family:inherit; font-weight:600; font-size:11px;
+  letter-spacing:.16em; padding:8px 11px; cursor:pointer; }
+.gtab.on { color:var(--green); border-bottom-color:var(--green); }
+
+.strip { display:flex; gap:8px; overflow-x:auto; padding-bottom:8px; margin-bottom:4px;
+  scrollbar-width:none; }
+.strip::-webkit-scrollbar { display:none; }
+.chip { flex:0 0 auto; background:var(--panel); border:1px solid var(--line2);
+  color:var(--text); font-family:inherit; font-weight:600; font-size:12px;
+  letter-spacing:.1em; padding:9px 13px; cursor:pointer; border-radius:3px; text-align:left; }
+.chip small { display:block; font-weight:400; font-size:9px; color:var(--mut);
+  letter-spacing:.06em; margin-top:2px; text-transform:lowercase; }
+.chip.on { border-color:var(--green); color:var(--green);
+  box-shadow:0 0 12px rgba(61,255,160,.15) inset; }
+
+.note { display:flex; gap:10px; align-items:baseline; background:var(--panel);
+  border-left:3px solid var(--green); padding:10px 12px; margin-bottom:14px; }
+.note.user-note { border-left-color:var(--amber); }
+.note.user-note b { color:var(--amber); }
+.note b { font-size:10px; letter-spacing:.18em; color:var(--green); flex:0 0 auto; }
+.note span.txt { font-family:var(--mono); font-size:11.5px; line-height:1.5; color:var(--text); }
+.edited { color:var(--amber); font-size:10px; letter-spacing:.1em; margin-left:auto; flex:0 0 auto; }
+
+.board { background:var(--panel); border:1px solid var(--line2); border-radius:6px;
+  padding:12px 10px; display:flex; flex-wrap:wrap; gap:10px; }
+.sec { border:1px solid var(--line); border-radius:4px; padding:8px 6px 4px; flex:1 1 auto; }
+.sec-head { display:block; width:100%; background:none; border:none; padding:0;
+  cursor:pointer; font-family:inherit; }
+.sec-name { font-size:9px; font-weight:600; letter-spacing:.22em; color:var(--green-dim);
+  text-align:center; margin-bottom:1px; }
+.sec-tag { font-family:var(--mono); font-size:8px; color:var(--mut); text-align:center;
+  letter-spacing:.05em; margin-bottom:6px; }
+.sec-knobs { display:flex; justify-content:center; gap:2px; flex-wrap:wrap; }
+
+.knob { display:flex; flex-direction:column; align-items:center; width:56px; padding:2px 0; }
+.knob-svg { touch-action:none; cursor:ns-resize; display:block;
+  -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
+.knob-svg:focus-visible { outline:2px solid var(--green); outline-offset:2px; border-radius:50%; }
+.k-track { fill:none; stroke:var(--line2); stroke-width:3; stroke-linecap:round; }
+.k-fill { fill:none; stroke:var(--green); stroke-width:3; stroke-linecap:round;
+  filter:drop-shadow(0 0 3px rgba(61,255,160,.7)); }
+.k-body { fill:#151c19; stroke:#000; stroke-width:1; }
+.k-pointer { stroke:var(--green); stroke-width:2.5; stroke-linecap:round; }
+.k-label { font-size:8.5px; font-weight:600; letter-spacing:.08em; color:var(--mut); margin-top:3px; }
+.k-value { font-family:var(--mono); font-size:9.5px; color:var(--green); }
+
+.savebar { display:flex; gap:8px; margin-top:16px; }
+.savebar input { flex:1; background:var(--panel); border:1px solid var(--line2);
+  color:var(--text); font-family:var(--mono); font-size:13px;
+  letter-spacing:.08em; padding:10px 12px; border-radius:3px; min-width:0; }
+.savebar input:focus { outline:none; border-color:var(--amber); }
+.savebar input::placeholder { color:var(--mut); }
+.btn { background:var(--amber); color:#1a1206; border:none; font-family:inherit;
+  font-weight:700; font-size:12px; letter-spacing:.12em; padding:10px 16px;
+  border-radius:3px; cursor:pointer; }
+.btn:disabled { opacity:.35; cursor:default; }
+
+.plist { margin-top:12px; display:flex; flex-direction:column; gap:6px; }
+.plist-top { display:flex; align-items:center; gap:8px; }
+.plist-hd { font-size:10px; font-weight:600; letter-spacing:.2em; color:var(--amber); margin-right:auto; }
+.tbtn { background:none; border:1px solid var(--line2); color:var(--mut);
+  font-family:var(--mono); font-size:10px; letter-spacing:.08em;
+  padding:4px 9px; border-radius:3px; cursor:pointer; }
+.tbtn:hover { border-color:var(--amber); color:var(--amber); }
+.prow { display:flex; align-items:center; gap:10px; background:var(--panel);
+  border:1px dashed var(--line2); border-radius:3px; padding:8px 12px; }
+.prow.on { border:2px solid var(--amber); padding:7px 11px;
+  box-shadow:0 0 14px rgba(255,177,61,.18); }
+.prow .name { background:none; border:none; color:var(--amber); font-family:inherit;
+  font-weight:600; font-size:12px; letter-spacing:.1em; cursor:pointer; padding:0; text-align:left; }
+.prow .live { font-family:var(--mono); font-size:9px; color:var(--amber);
+  letter-spacing:.1em; border:1px solid var(--amber); border-radius:2px; padding:1px 5px; flex:0 0 auto; }
+.prow .from { font-family:var(--mono); font-size:10px; color:var(--mut); margin-left:auto; text-align:right; }
+.prow .del { background:none; border:1px solid var(--line2); color:var(--mut);
+  font-family:var(--mono); font-size:10px; padding:3px 8px; border-radius:3px; cursor:pointer; flex:0 0 auto; }
+.prow .del.arm { border-color:#ff5d5d; color:#ff5d5d; }
+
+.btn.ghost { background:none; border:1px solid var(--line2); color:var(--mut); }
+.scrim { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:40; }
+.sheet { position:fixed; left:0; right:0; bottom:0; z-index:41; background:var(--panel);
+  border-top:2px solid var(--green);
+  padding:16px 18px calc(24px + env(safe-area-inset-bottom));
+  max-width:760px; margin:0 auto; box-shadow:0 -8px 30px rgba(0,0,0,.6);
+  max-height:75vh; overflow-y:auto; }
+.pair-hd { font-size:9px; font-weight:600; letter-spacing:.22em; color:var(--amber);
+  margin-top:12px; margin-bottom:2px; }
+.pair { border-top:1px solid var(--line); padding:7px 0; }
+.pair b { display:block; font-size:11px; font-weight:600; letter-spacing:.08em;
+  color:var(--green); margin-bottom:1px; }
+.pair span { font-family:var(--mono); font-size:11px; line-height:1.5; color:var(--text); }
+.sheet-sec { font-family:var(--mono); font-size:9px; letter-spacing:.24em; color:var(--green-dim); }
+.sheet-name { font-size:18px; font-weight:700; letter-spacing:.12em; color:var(--green); margin:2px 0 8px; }
+.sheet-txt { font-family:var(--mono); font-size:12px; line-height:1.65; color:var(--text); }
+.sheet .btn { margin-top:12px; }
+.flash { position:fixed; bottom:calc(18px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
+  background:var(--green); color:#04140c; font-weight:700; font-size:12px;
+  letter-spacing:.1em; padding:9px 16px; border-radius:3px; display:none; }
+.empty { font-family:var(--mono); font-size:11px; color:var(--mut); margin-top:12px; line-height:1.6; }
+@media (prefers-reduced-motion:no-preference) {
+  .chip, .gtab, .btn, .prow { transition:border-color .15s, color .15s, opacity .15s, box-shadow .15s; }
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="hd">
+    <h1>SYSTEM-1 <span>PATCH MAP</span></h1>
+    <p>starting points, not sounds — hold a knob or tap a section title to learn it</p>
+  </header>
+  <div class="gtabs" id="gtabs"></div>
+  <div class="strip" id="strip"></div>
+  <div class="note" id="note">
+    <b id="noteHd">START HERE</b>
+    <span class="txt" id="noteTxt"></span>
+    <span class="edited" id="editedTag" style="display:none">● EDITED</span>
+  </div>
+  <div class="board" id="board"></div>
+  <div class="savebar">
+    <input id="saveName" placeholder="Name this starting point…" maxlength="24">
+    <button class="btn" id="saveBtn">SAVE</button>
+  </div>
+  <div id="plistWrap"></div>
+  <input type="file" id="importFile" accept=".json,application/json,text/plain" style="display:none">
+  <div class="scrim" id="scrim" style="display:none"></div>
+  <div class="sheet" id="sheet" style="display:none" role="dialog">
+    <div class="sheet-sec" id="sheetSec"></div>
+    <div class="sheet-name" id="sheetName"></div>
+    <p class="sheet-txt" id="sheetTxt"></p>
+    <div id="sheetPairs"></div>
+    <button class="btn ghost" id="sheetClose">CLOSE</button>
+  </div>
+  <div class="flash" id="flash"></div>
+</div>
+
+<script>
+"use strict";
+// ---------- Panel definition ----------
+const WAVES = ["SAW", "SQR", "TRI"];
+const LFO_WAVES = ["SIN", "TRI", "SAW", "SQR", "S&H", "RND"];
+const RANGES = ["64", "32", "16", "8", "4", "2"];
+const SWITCH = ["OFF", "ON"];
+
+const SECTIONS = [
+  { name: "LFO", params: ["lfoWave", "lfoRate", "lfoFade", "lfoPitch", "lfoFilter", "lfoAmp"] },
+  { name: "OSC 1", params: ["o1Wave", "o1Range", "o1Color", "crossMod"] },
+  { name: "OSC 2", params: ["o2Wave", "o2Range", "o2Color", "o2Tune", "ring", "sync"] },
+  { name: "MIXER", params: ["mixO1", "mixO2", "mixSub", "subType", "mixNoise", "noiseType"] },
+  { name: "PITCH", params: ["pitchEnv", "pitchA", "pitchD"] },
+  { name: "FILTER", params: ["hpf", "cutoff", "lpfType", "reso", "fEnvAmt", "keyFollow"] },
+  { name: "FILTER ENV", params: ["fA", "fD", "fS", "fR"] },
+  { name: "AMP", params: ["ampTone", "aA", "aD", "aS", "aR"] },
+  { name: "EFFECTS", params: ["crush", "reverb", "delay", "delayTime"] },
+];
+
+const LABELS = {
+  lfoWave: "WAVE", lfoRate: "RATE", lfoFade: "FADE", lfoPitch: "→PITCH", lfoFilter: "→FILTER", lfoAmp: "→AMP",
+  o1Wave: "WAVE", o1Range: "RANGE", o1Color: "COLOR", crossMod: "X-MOD",
+  o2Wave: "WAVE", o2Range: "RANGE", o2Color: "COLOR", o2Tune: "TUNE", ring: "RING", sync: "SYNC",
+  mixO1: "OSC 1", mixO2: "OSC 2", mixSub: "SUB", subType: "SUB TYPE", mixNoise: "NOISE", noiseType: "NS TYPE",
+  pitchEnv: "ENV", pitchA: "A", pitchD: "D",
+  hpf: "HPF", cutoff: "CUTOFF", lpfType: "LPF", reso: "RESO", fEnvAmt: "ENV", keyFollow: "KEY",
+  fA: "A", fD: "D", fS: "S", fR: "R",
+  ampTone: "TONE", aA: "A", aD: "D", aS: "S", aR: "R",
+  crush: "CRUSH", reverb: "REVERB", delay: "DELAY", delayTime: "D.TIME",
+};
+
+const STEPPED = {
+  o1Wave: WAVES, o2Wave: WAVES, lfoWave: LFO_WAVES,
+  o1Range: RANGES, o2Range: RANGES,
+  ring: SWITCH, sync: SWITCH,
+  lpfType: ["12dB", "24dB"], subType: ["-1OCT", "-2OCT"], noiseType: ["WHITE", "PINK"],
+};
+const BIG = new Set(["cutoff", "reso"]);
+const BIPOLAR = new Set(["o2Tune", "pitchEnv"]);
+
+// Panel defaults: 8' ranges, pitch env centred (off), tone open, delay time centred
+const ZERO = Object.assign(
+  Object.fromEntries(Object.keys(LABELS).map(k => [k, 0])),
+  { o1Range: 60, o2Range: 60, pitchEnv: 50, ampTone: 100, delayTime: 50 }
+);
+
+const INFO = {
+  lfoWave: "The shape of the LFO's movement. SIN and TRI wobble smoothly, SAW ramps rhythmically, SQR snaps between two values for trills and hard wobble, S&H jumps between random steps (talky, robotic), RND drifts randomly and smoothly.",
+  lfoRate: "How fast the LFO cycles. Slow is drift and long filter sweeps; medium is vibrato and wobble; very fast becomes rough, buzzy texture. On the hardware this can lock to tempo with TEMPO SYNC.",
+  lfoFade: "Makes the LFO arrive late — it fades in after each key press. Classic move: vibrato that blooms a moment into every held note instead of starting instantly.",
+  lfoPitch: "Sends the LFO to pitch. A touch is vibrato or tape warble; more is sirens, dive-bombs, and the Hoover's queasy growl.",
+  lfoFilter: "Sends the LFO to the filter cutoff. This is the wobble control — dubstep wob, auto-wah funk, and slow pad breathing all come from here, with RATE setting the speed.",
+  lfoAmp: "Sends the LFO to volume: tremolo. With a SQR wave and a high amount it becomes hard rhythmic gating — an instant trance gate.",
+  o1Wave: "Oscillator 1's raw tone. SAW is bright and full (leads, basses, brass), SQR is hollow and woody (organs, chiptune), TRI is soft and pure (subs, whistles, blips). The app shows the three core shapes — the hardware's extra variants are these waves with different COLOR behaviour.",
+  o1Range: "The octave, organ-style: 64' and 32' are rumble, 8' is standard playing pitch, 4' and 2' are high and piercing. Setting the two oscillators an octave apart is the fastest thickness trick there is.",
+  o1Color: "Continuously reshapes the wave — pulse width on squares, stacked and phased saws on saws. Sweeping it (via the MOD knob on the hardware) gives the classic PWM shimmer.",
+  crossMod: "OSC 2's waveform bends OSC 1's frequency — simple FM. Small amounts add growl and grit to a bass; large amounts go clangorous and bell-like. The aggressive-lead secret weapon.",
+  o2Wave: "Oscillator 2's raw tone. Same wave as OSC 1 but detuned = classic thickness; a different wave = a more complex composite. OSC 2 also drives RING and X-MOD, so its wave changes their character too.",
+  o2Range: "OSC 2's octave. Set it a step below OSC 1 for weight, or above for sparkle — the rave-organ jab is just OSC 2 an octave up.",
+  o2Color: "Reshapes OSC 2's wave, same as OSC 1's COLOR. Different COLOR settings on each oscillator stop a detuned pair sounding like one flat wave.",
+  o2Tune: "Detunes OSC 2 against OSC 1, plus or minus around centre. A few clicks off is chorus-like width; further is dirty rave beating; extreme settings become musical intervals like fifths.",
+  ring: "Ring modulation: multiplies the two oscillators, producing sum-and-difference tones that ignore normal harmony. Metallic, glassy, bell-like. Move OSC 2 TUNE to choose the pitch of the metal.",
+  sync: "Hard sync: OSC 2 is forced to restart every OSC 1 cycle. The famous sound is sweeping OSC 2 TUNE while SYNC is on — the ripping, tearing sync lead.",
+  mixO1: "Oscillator 1's level into the filter. Rebalance a layered patch here without changing its character.",
+  mixO2: "Oscillator 2's level. Even at zero, OSC 2 still works as the modulator for X-MOD — you can use its effect without hearing it directly.",
+  mixSub: "Level of the sub oscillator — a pure tone locked one or two octaves under OSC 1. Instant foundation and weight without changing the patch up top.",
+  subType: "The sub's octave: -1 OCT reinforces the note; -2 OCT is chest-pressure territory. Use -2 in mono and sparingly — small speakers won't even reproduce it.",
+  mixNoise: "Noise level. A whisper adds air and breath to pads; half is snare-and-hat territory; full is risers, wind, and percussion.",
+  noiseType: "WHITE noise is bright hiss — hats, risers, sizzle. PINK is darker and softer — wind, surf, warmth behind a pad.",
+  pitchEnv: "How far the pitch envelope bends each note, plus or minus around centre. Up with a fast decay = zaps, laser hits, and the 808-style pitch drop at the front of a kick or sub. Down = reverse swoops and tape-stop dips.",
+  pitchA: "How long the pitch bend takes to reach full strength. Keep at 0 for percussive zaps and drops; raise it for sirens and swoops that glide in.",
+  pitchD: "How fast pitch falls back to the true note. Very short is a click of attitude on each attack; medium is the zap; long is a full siren descent.",
+  hpf: "High-pass filter — removes low end. Thins pads, stabs, and noise so they sit above your kick and bass instead of fighting them. Sweeping it upward is a classic tension build.",
+  cutoff: "The main low-pass cutoff, and the most-played knob on any synth. Anticlockwise is dark, muffled, distant; clockwise is bright and open. Nearly every classic filter move in dance music is this knob, ridden by hand.",
+  lpfType: "The filter's steepness. 12dB is gentler and brighter with a rawer resonance feel; 24dB is steeper, darker, and smoother — the fat classic-analog slope. Same patch, two personalities.",
+  reso: "Boosts the frequencies right at the cutoff point. Medium is honky and vocal, high is squelchy acid, and at maximum the filter sings a pitch of its own (self-oscillation) — playable in tune if KEY is up.",
+  fEnvAmt: "How hard the filter envelope pushes cutoff on each note — the wah amount. High settings with a short filter decay give plucky, squelchy attacks; it's most of what makes acid acid.",
+  keyFollow: "Makes cutoff track the keyboard: higher notes open the filter more, so runs don't go dull at the top. At maximum it tunes a self-oscillating filter to the keys.",
+  fA: "How long the filter takes to open on each note. Zero is instant bite; slow settings sweep the brightness in — pads and risers.",
+  fD: "How fast the filter falls back after opening — the length of the squelch. With CUTOFF and RESO this is the acid performance trio.",
+  fS: "Where the filter settles while you hold a note. Zero means every note closes into a pluck no matter how long you hold; high keeps it open.",
+  fR: "How the filter closes after you release the key. Long release here with a long amp release gives tails that darken as they die.",
+  ampTone: "A simple tone control at the end of the chain. Backing it off darkens or softens a patch without touching the filter — good for taming edge or sitting a sound back in the mix.",
+  aA: "Volume attack. Zero is instant — basses, stabs, percussion. Slow is a pad breathing in.",
+  aD: "How fast volume falls from its peak toward the sustain level. Shapes the front of the note after the initial hit.",
+  aS: "The volume a held note settles to. At zero every note is a hit or a pluck, regardless of how long you hold the key.",
+  aR: "How long sound hangs on after you release. Short is tight and sequenced; long is washes and tails that overlap the next note.",
+  crush: "The bit crusher — lo-fi digital destruction. A touch adds dust and attitude; halfway is Big Beat rudeness; full is broken 8-bit noise.",
+  reverb: "Space. Low is a room behind the sound; high, the sound becomes the room — techno rumble bass and void pads are mostly this knob.",
+  delay: "Echo level. Turns plucks and blips into rhythmic patterns and fills the gaps in sparse playing. Tempo-syncs on the hardware.",
+  delayTime: "The gap between echoes. Very short is slapback and metallic doubling; medium taps along with the groove; long is dub-space repeats.",
+};
+
+const SECTION_META = {
+  "LFO": {
+    tag: "movement & wobble",
+    info: "A slow invisible hand that turns other knobs for you, over and over. It makes no sound by itself — WAVE and RATE set the motion, and the three arrow knobs choose what gets moved: pitch, filter, or volume.",
+    pairs: [
+      { k: "→FILTER + RATE", t: "The wobble recipe. Amount sets how deep, RATE how fast — from slow pad breathing to dubstep wob." },
+      { k: "→PITCH + FADE", t: "A little pitch depth plus some FADE = vibrato that blooms into each held note, like a string player." },
+      { k: "→AMP + SQR wave", t: "Square-wave tremolo at full depth chops the sound on and off — an instant trance gate." },
+    ],
+  },
+  "OSC 1": {
+    tag: "the raw tone",
+    info: "Where the sound is born. WAVE picks the basic flavour, RANGE the octave, COLOR bends the shape, and X-MOD lets OSC 2 rough it up. Everything after this section only removes or shapes what starts here.",
+    pairs: [
+      { k: "X-MOD + OSC 2 WAVE / RANGE", t: "The growl's character comes from the modulator — OSC 2's wave and octave change what X-MOD sounds like, even with OSC 2's mixer level at zero." },
+      { k: "COLOR + LFO", t: "Moving COLOR is the classic PWM shimmer. On the hardware, point the oscillator's MOD knob at the LFO to automate it." },
+    ],
+  },
+  "OSC 2": {
+    tag: "thickness & metal",
+    info: "The second voice. Detuned against OSC 1 it makes things wide and expensive-sounding; through RING or SYNC it turns metallic and aggressive. It needs its MIXER level up to be heard directly.",
+    pairs: [
+      { k: "TUNE + MIXER OSC 2", t: "Detune width needs both: TUNE off-centre AND the OSC 2 level up. One without the other is nothing." },
+      { k: "RING + TUNE", t: "RING makes the metal; TUNE picks which bell got struck." },
+      { k: "SYNC + TUNE", t: "Turn SYNC on, then sweep TUNE — that ripping tear is the classic sync lead." },
+    ],
+  },
+  "MIXER": {
+    tag: "the recipe",
+    info: "How much of each ingredient reaches the filter: both oscillators, the sub, and noise. Rebalancing here changes a patch more gently than any other section — same sound, different proportions.",
+    pairs: [
+      { k: "SUB + SUB TYPE", t: "Weight, and where it sits. -1 OCT supports the note; -2 OCT shakes the room — mind small speakers." },
+      { k: "NOISE + NS TYPE + HPF", t: "A whisper of noise adds air and breath; HPF keeps that air out of the low end where it turns to mud." },
+    ],
+  },
+  "PITCH": {
+    tag: "zaps & drops",
+    info: "A one-shot pitch bend fired at every note. Centre is off. Push it up with a fast decay for laser zaps and 808-style drops; pull it down for reverse swoops. Tiny amounts with a fast decay just add attack attitude.",
+    pairs: [
+      { k: "ENV + D", t: "Depth picks how far pitch jumps; D picks how fast it falls home. Short D = zap, long D = siren." },
+    ],
+  },
+  "FILTER": {
+    tag: "brightness & squelch",
+    info: "The most-played section on the synth. CUTOFF darkens or opens the sound, RESO makes the edge sing, HPF trims the lows, and ENV lets the filter envelope play the cutoff for you on every note.",
+    pairs: [
+      { k: "CUTOFF + RESO + ENV", t: "The acid trio. Cutoff low, reso high, env big — then perform on CUTOFF by hand." },
+      { k: "ENV needs headroom", t: "The envelope pushes CUTOFF upward. If cutoff is already wide open, ENV has nowhere to go and does nothing — close the filter first." },
+      { k: "RESO + KEY", t: "Maximum RESO makes the filter sing its own note; KEY at full tunes that whistle to the keyboard." },
+    ],
+  },
+  "FILTER ENV": {
+    tag: "shape of the wah",
+    info: "Four sliders that draw how the filter moves through each note: how fast it opens (A), how fast it falls (D), where it settles while held (S), and how it closes after release (R). Its strength is the ENV knob back in the FILTER section.",
+    pairs: [
+      { k: "D + FILTER ENV amount", t: "Short D with a big amount is the pluck and the squelch; lengthen D and the same patch becomes a lead." },
+      { k: "S at zero", t: "Guarantees every note closes into a pluck, no matter how long you hold the key." },
+    ],
+  },
+  "AMP": {
+    tag: "shape of the volume",
+    info: "The same four-slider envelope, but for loudness — the difference between a stab, a pluck, and a pad is mostly drawn here. TONE at the end gently darkens everything, after the filter.",
+    pairs: [
+      { k: "A + R", t: "Both slow = pads that overlap and breathe. Both fast = tight sequenced hits." },
+      { k: "S at zero + D", t: "With sustain at zero, D IS the note length — decay becomes your note-shaping knob." },
+      { k: "TONE + CRUSH", t: "CRUSH gets harsh up top; pulling TONE back tames it into warm dirt." },
+    ],
+  },
+  "EFFECTS": {
+    tag: "space & dirt",
+    info: "The send-offs: CRUSH breaks the sound, REVERB puts it in a room, DELAY repeats it. On sparse patterns the effects are half the composition — bleep techno and trance plucks are mostly delay.",
+    pairs: [
+      { k: "DELAY + D.TIME", t: "Level and spacing. Short times thicken and double; long times write echo patterns for you." },
+      { k: "REVERB + HPF", t: "Big reverb muds up fast — raise HPF so the wash floats above the kick instead of sitting on it." },
+    ],
+  },
+};
+
+// ---------- Factory library ----------
+const LIBRARY = [
+  { genre:"STARTERS", patches:[
+    { id:"init", name:"INIT", tag:"blank canvas",
+      note:"Single saw, filter wide open, instant envelope. Everything you hear from here, you added.",
+      v:{ o1Wave:0, mixO1:100, cutoff:100, aS:100, aR:8, fS:100 } },
+    { id:"sub", name:"SUB BASS", tag:"low end",
+      note:"Cutoff and filter ENV are your first moves. Stay in a low octave, keep noise at zero.",
+      v:{ o1Wave:0, mixO1:80, mixSub:100, cutoff:24, reso:10, fEnvAmt:30, fD:40, fS:20, fR:20, aD:50, aS:80, aR:14 } },
+    { id:"pad", name:"HOLLOW PAD", tag:"slow + wide",
+      note:"Slow attacks everywhere. Nudge OSC 2 TUNE off centre for width; LFO to FILTER adds drift.",
+      v:{ o1Wave:50, o1Color:40, o2Wave:50, o2Color:60, o2Tune:54, mixO1:80, mixO2:80, mixSub:20, mixNoise:5, hpf:15, cutoff:45, reso:20, fEnvAmt:20, fA:60, fD:60, fS:70, fR:70, aA:65, aD:60, aS:85, aR:75, lfoRate:30, lfoFilter:20, reverb:70, delay:30 } },
+    { id:"stab", name:"DETUNED STAB", tag:"rave chords",
+      note:"Two saws, OSC 2 pushed sharp. Wider TUNE = more dirt. Filter ENV gives it the bark.",
+      v:{ o1Wave:0, o2Wave:0, o2Tune:58, mixO1:90, mixO2:90, mixSub:40, cutoff:60, reso:30, fEnvAmt:50, fD:45, fS:10, fR:20, aD:55, aS:25, aR:25, reverb:35, delay:25 } },
+    { id:"fx", name:"NOISE / FX", tag:"risers + air",
+      note:"Noise through a resonant sweep. Automate HPF up while CUTOFF comes down. CRUSH to taste.",
+      v:{ o1Wave:100, mixO1:20, mixNoise:100, hpf:40, cutoff:70, reso:80, fEnvAmt:60, fA:70, fD:70, fS:50, fR:80, aA:50, aS:80, aR:80, lfoRate:60, lfoFilter:70, reverb:80, crush:40 } },
+  ]},
+  { genre:"SYNTH-POP '81", patches:[
+    { id:"sp1", name:"POLY BRASS", tag:"jump stab",
+      note:"The big 80s brass chord. Play triads; a hint of OSC 2 detune does the shimmer.",
+      v:{ o1Wave:0, o2Wave:0, o2Tune:56, mixO1:90, mixO2:90, mixSub:25, cutoff:55, reso:15, fEnvAmt:35, fA:5, fD:50, fS:60, fR:30, aA:5, aD:50, aS:75, aR:30, reverb:25 } },
+    { id:"sp2", name:"GLASS KEYS", tag:"dx-style pluck",
+      note:"RING between the triangles is the glass; COLOR is the brightness of the tine.",
+      v:{ o1Wave:100, o1Color:70, o2Wave:100, o2Color:40, o2Tune:50, mixO1:85, mixO2:50, cutoff:75, reso:20, fEnvAmt:30, fD:45, fS:15, fR:35, aD:55, aS:30, aR:40, reverb:45, delay:20, ring:100 } },
+    { id:"sp3", name:"NIGHT DRIVE BASS", tag:"motorik 8ths",
+      note:"Straight 8th notes with the delay ticking along. The 80s highway at night.",
+      v:{ o1Wave:0, mixO1:100, mixSub:60, cutoff:34, reso:18, fEnvAmt:35, fD:30, fS:20, fR:10, aD:40, aS:55, aR:10, delay:20 } },
+    { id:"sp4", name:"NEON PAD", tag:"chorus dream",
+      note:"Wide and misty. Slight LFO drift stands in for the chorus pedal.",
+      v:{ o1Wave:0, o2Wave:100, o2Tune:55, o2Color:30, mixO1:75, mixO2:75, hpf:10, cutoff:60, reso:10, fA:55, fS:75, fR:60, aA:55, aS:85, aR:65, lfoRate:25, lfoFilter:12, reverb:65, delay:25 } },
+  ]},
+  { genre:"ELECTRO '82", patches:[
+    { id:"el1", name:"PLANET BASS", tag:"freestyle low",
+      note:"Punchy square funk. Short notes, syncopation - let the 808 do the rest.",
+      v:{ o1Wave:50, mixO1:100, mixSub:50, cutoff:38, reso:30, fEnvAmt:50, fD:25, fR:8, aD:35, aS:35, aR:8, crush:15 } },
+    { id:"el2", name:"LASER ZAP", tag:"pew pew",
+      note:"PITCH ENV cranked with a fast decay is the zap; the ringing filter is the tail.",
+      v:{ o1Wave:50, mixO1:40, cutoff:15, reso:95, fEnvAmt:90, fD:12, aD:15, aR:10, delay:30, pitchEnv:95, pitchD:12 } },
+    { id:"el3", name:"ROBOT TALK", tag:"vocoder-ish",
+      note:"Not a real vocoder, but the resonant LFO chatter reads as machine speech.",
+      v:{ o1Wave:50, o1Color:60, o2Wave:50, o2Color:40, o2Tune:50, mixO1:80, mixO2:60, cutoff:45, reso:55, fEnvAmt:25, lfoRate:65, lfoFilter:35, lfoWave:60, fD:40, fS:40, aD:40, aS:60, aR:15, crush:20 } },
+    { id:"el4", name:"BOOGIE LEAD", tag:"portamento funk",
+      note:"Slinky top-line funk. Turn the hardware portamento up - that slide is the sound.",
+      v:{ o1Wave:0, o2Wave:50, o2Tune:75, mixO1:90, mixO2:55, cutoff:58, reso:25, fEnvAmt:40, fD:40, fS:35, aD:45, aS:65, aR:20, delay:25 } },
+  ]},
+  { genre:"ITALO '83", patches:[
+    { id:"it1", name:"OCTAVE BASS", tag:"spacer disco",
+      note:"Sequence it in octaves, 16ths. Short and springy - the whole genre in one line.",
+      v:{ o1Wave:0, mixO1:100, mixSub:40, cutoff:42, reso:22, fEnvAmt:45, fD:22, fR:6, aD:30, aS:30, aR:6, delay:15 } },
+    { id:"it2", name:"SPARKLE ARP", tag:"crystal 16ths",
+      note:"Runs on the delay. High octave - let it glitter over the octave bass.",
+      v:{ o1Wave:100, mixO1:100, cutoff:80, reso:35, fEnvAmt:35, fD:30, fS:10, aD:30, aS:20, aR:25, delay:55, reverb:30 } },
+    { id:"it3", name:"HERO LEAD", tag:"chorus anthem",
+      note:"Sings the chorus melody. Detuned, proud, slightly too loud - as intended.",
+      v:{ o1Wave:0, o2Wave:0, o2Tune:57, mixO1:95, mixO2:95, cutoff:62, reso:20, fEnvAmt:25, fA:5, fD:50, fS:70, fR:35, aA:5, aS:85, aR:35, reverb:40, delay:35 } },
+    { id:"it4", name:"SPACE CHOIR", tag:"cosmic pad",
+      note:"Airy aah stand-in. The touch of noise is the breath.",
+      v:{ o1Wave:100, o1Color:35, o2Wave:50, o2Color:55, o2Tune:53, mixO1:70, mixO2:70, mixNoise:12, hpf:20, cutoff:52, reso:15, fA:60, fS:75, fR:65, aA:60, aS:85, aR:70, lfoRate:20, lfoFilter:10, reverb:75, delay:30 } },
+  ]},
+  { genre:"EBM '86", patches:[
+    { id:"eb1", name:"BODY BASS", tag:"sequencer punch",
+      note:"Relentless 16th-note muscle. Everything short, everything on the grid.",
+      v:{ o1Wave:0, o2Wave:50, o2Tune:50, mixO1:90, mixO2:70, mixSub:35, cutoff:36, reso:28, fEnvAmt:55, fD:20, fR:5, aD:25, aS:25, aR:5, crush:20 } },
+    { id:"eb2", name:"STEEL CLANK", tag:"metal perc",
+      note:"RING mod makes the metal. Detune OSC 2 to change which pipe got hit.",
+      v:{ o1Wave:50, o2Wave:50, o2Tune:63, mixO1:35, mixO2:45, mixNoise:80, hpf:55, cutoff:70, reso:75, fEnvAmt:65, fD:10, aD:12, aR:8, crush:30, delay:25, ring:100 } },
+    { id:"eb3", name:"BUNKER DRONE", tag:"cold sustain",
+      note:"Hold one low note under the whole track. OSC 2 tuned flat = the unease.",
+      v:{ o1Wave:0, o2Wave:0, o2Tune:47, mixO1:85, mixO2:85, mixSub:30, cutoff:28, reso:35, lfoRate:12, lfoFilter:22, fS:100, aA:30, aS:100, aR:60, reverb:45, crush:10 } },
+    { id:"eb4", name:"AIR RAID", tag:"sweep siren",
+      note:"Slow pitch-and-filter wail. Use sparingly - it swallows a mix whole.",
+      v:{ o1Wave:0, mixO1:80, cutoff:50, reso:70, lfoRate:30, lfoPitch:35, lfoFilter:45, fS:80, aA:20, aS:90, aR:50, reverb:35, delay:30 } },
+  ]},
+  { genre:"NEW BEAT '87", patches:[
+    { id:"nb1", name:"PUMP BASS", tag:"slow + heavy",
+      note:"Belgium, 105 BPM, pitch everything down. Heavy and a little wrong - correct.",
+      v:{ o1Wave:50, mixO1:90, mixSub:70, cutoff:30, reso:25, fEnvAmt:45, fD:35, fS:15, aD:45, aS:50, aR:15, crush:10 } },
+    { id:"nb2", name:"DUNGEON STAB", tag:"minor hit",
+      note:"Minor-key jab on the offbeat. The reverb tail is half the drama.",
+      v:{ o1Wave:0, o2Wave:50, o2Tune:53, mixO1:85, mixO2:70, mixSub:30, cutoff:44, reso:35, fEnvAmt:55, fD:35, fR:20, aD:45, aS:10, aR:30, reverb:50, delay:20 } },
+    { id:"nb3", name:"COLD WAVE PAD", tag:"grey drift",
+      note:"Overcast in synth form. Sits behind the pump bass without asking attention.",
+      v:{ o1Wave:50, o1Color:45, o2Wave:100, o2Tune:54, mixO1:70, mixO2:70, hpf:18, cutoff:36, reso:20, fA:50, fS:70, fR:55, aA:50, aS:85, aR:60, lfoRate:18, lfoFilter:15, reverb:55 } },
+  ]},
+  { genre:"ACID '88", patches:[
+    { id:"ah1", name:"303 SQUELCH", tag:"the classic",
+      note:"CUTOFF + RESO are the performance. Push ENV for accents; keep filter sustain at zero.",
+      v:{ o1Wave:0, mixO1:100, mixSub:25, cutoff:28, reso:78, fEnvAmt:72, fD:30, fR:8, aD:42, aS:55, aR:8, delay:30 } },
+    { id:"ah2", name:"RUBBER ACID", tag:"round + bouncy",
+      note:"Square wave rounds off the scream. Darker cutoff, more bounce - good under vocals.",
+      v:{ o1Wave:50, mixO1:100, mixSub:40, cutoff:22, reso:62, fEnvAmt:60, fD:38, aD:48, aS:60, aR:10, delay:22 } },
+    { id:"ah3", name:"SCREAMER", tag:"peak time",
+      note:"RESO on the edge of self-oscillation - tiny cutoff moves go a long way. CRUSH adds teeth.",
+      v:{ o1Wave:0, mixO1:100, cutoff:45, reso:92, fEnvAmt:80, fD:26, fR:6, aD:40, aS:50, aR:8, crush:25, delay:40, reverb:12 } },
+    { id:"ah4", name:"SLOW ACID", tag:"half-time",
+      note:"Long filter decay smears the squelch into a moan. Let the delay fill the space.",
+      v:{ o1Wave:0, mixO1:100, mixSub:45, cutoff:20, reso:55, fEnvAmt:55, fD:68, fS:15, fR:35, aD:60, aS:70, aR:30, delay:45, reverb:20 } },
+  ]},
+  { genre:"BLEEP '89", patches:[
+    { id:"bl1", name:"SHEFFIELD BLEEP", tag:"LFO / Warp",
+      note:"Clean dots up top. Pair with the deepest sub you have - that contrast IS bleep.",
+      v:{ o1Wave:100, mixO1:100, cutoff:85, reso:20, fEnvAmt:20, fD:15, aD:18, aR:12, delay:35, reverb:15 } },
+    { id:"bl2", name:"WARP SUB", tag:"speaker test",
+      note:"Almost nothing but fundamental. If the car boot does not rattle, go lower.",
+      v:{ o1Wave:100, mixO1:50, mixSub:100, cutoff:14, fS:100, aA:5, aS:90, aR:20, subType:100 } },
+    { id:"bl3", name:"DOT MATRIX", tag:"seq blip",
+      note:"Sequence sparse patterns and let the delay print the rest of the page.",
+      v:{ o1Wave:50, mixO1:100, cutoff:65, reso:45, fEnvAmt:40, fD:14, aD:14, aR:8, delay:50, crush:12 } },
+  ]},
+  { genre:"DEEP HOUSE '90", patches:[
+    { id:"dh1", name:"WARM CHORD", tag:"mellow keys",
+      note:"Keep cutoff low-mid. Slight OSC 2 detune is the warmth - do not push it into chorus territory.",
+      v:{ o1Wave:100, o1Color:20, o2Wave:50, o2Color:35, o2Tune:52, mixO1:75, mixO2:70, mixSub:15, cutoff:38, reso:12, fEnvAmt:15, fA:15, fD:55, fS:55, fR:40, aA:10, aD:55, aS:75, aR:40, reverb:35, delay:20 } },
+    { id:"dh2", name:"SUB ROLLER", tag:"under the kick",
+      note:"Round and quiet up top - it sits under the kick, so tune it to the track, not the room.",
+      v:{ o1Wave:100, mixO1:60, mixSub:100, cutoff:18, reso:5, fEnvAmt:20, fD:35, fS:30, aD:45, aS:70, aR:12 } },
+    { id:"dh3", name:"DUSTY STAB", tag:"short + smoky",
+      note:"A little CRUSH is the dust. Keep the reverb small and dark, not wet.",
+      v:{ o1Wave:0, o2Wave:0, o2Tune:55, mixO1:85, mixO2:85, mixSub:30, cutoff:42, reso:25, fEnvAmt:40, fD:40, fS:5, fR:25, aD:50, aS:15, aR:30, reverb:30, crush:15 } },
+    { id:"dh4", name:"ORGAN BASS", tag:"hollow bounce",
+      note:"Play it staccato - SUB carries the weight while the square does the hollow top.",
+      v:{ o1Wave:50, o1Color:50, o2Wave:50, o2Tune:50, mixO1:90, mixO2:40, mixSub:60, cutoff:35, reso:20, fEnvAmt:25, fD:30, fS:60, aD:30, aS:85, aR:8 } },
+  ]},
+  { genre:"RAVE '91", patches:[
+    { id:"rv1", name:"MENTASM", tag:"the stab",
+      note:"The Second Phase growl. Ride OSC 2 TUNE while it sustains for the full siren.",
+      v:{ o1Wave:0, o1Color:40, o2Wave:0, o2Tune:64, o2Color:55, mixO1:95, mixO2:95, mixSub:30, cutoff:58, reso:40, fEnvAmt:60, fA:15, fD:60, fS:25, fR:45, aA:5, aS:65, aR:40, lfoPitch:18, lfoRate:60, reverb:30, crush:12, crossMod:25 } },
+    { id:"rv2", name:"M25 STAB", tag:"rave organ",
+      note:"Stand-in for the rave piano jab. Octave-up OSC 2 gives the cheap-sampler edge.",
+      v:{ o1Wave:50, o1Color:20, o2Wave:50, o2Tune:75, mixO1:90, mixO2:60, mixSub:30, cutoff:66, reso:20, fEnvAmt:30, fD:30, fS:20, aD:35, aS:20, aR:15, reverb:30, delay:25 } },
+    { id:"rv3", name:"RUSH RISER", tag:"hands up",
+      note:"Sixteen-bar build. Open CUTOFF by hand as it climbs - commit to it.",
+      v:{ o1Wave:0, mixO1:60, mixNoise:70, hpf:20, cutoff:40, reso:60, fEnvAmt:70, fA:80, fD:80, fS:60, fR:70, aA:70, aS:85, aR:70, lfoRate:50, lfoFilter:40, reverb:60, delay:35 } },
+    { id:"rv4", name:"AWESOME BASS", tag:"breakbeat low",
+      note:"Round low-end for hardcore breaks. Simple riffs, an octave lower than feels right.",
+      v:{ o1Wave:50, mixO1:85, mixSub:85, cutoff:26, reso:20, fEnvAmt:50, fD:30, fS:15, aD:40, aS:60, aR:12 } },
+  ]},
+  { genre:"TECHNO '92", patches:[
+    { id:"tc1", name:"RUMBLE", tag:"reverb bass",
+      note:"The reverb IS the sound. Feed it short low notes and the tail becomes the groove.",
+      v:{ o1Wave:0, mixO1:30, mixSub:80, mixNoise:45, cutoff:22, reso:35, fEnvAmt:30, fA:20, fD:60, fS:40, fR:70, aA:10, aS:80, aR:70, reverb:85, delay:30 } },
+    { id:"tc2", name:"PERC STAB", tag:"synth drum",
+      note:"A drum in synth clothing. Tune HPF so it sits between the hats and the snare.",
+      v:{ o1Wave:50, mixO1:50, mixNoise:70, hpf:45, cutoff:65, reso:55, fEnvAmt:70, fD:15, fR:10, aD:18, aR:12, delay:35, crush:20 } },
+    { id:"tc3", name:"BLIP SEQ", tag:"hypnotic dots",
+      note:"Play sparse - the delay feedback does the sequencing for you.",
+      v:{ o1Wave:100, mixO1:100, cutoff:55, reso:40, fEnvAmt:50, fD:18, aD:15, aR:10, delay:65, reverb:20 } },
+    { id:"tc4", name:"WAREHOUSE PAD", tag:"concrete air",
+      note:"HPF keeps it out of the kick's way. Let it drone under everything for whole sections.",
+      v:{ o1Wave:0, o2Wave:50, o2Tune:53, o2Color:40, mixO1:70, mixO2:70, mixNoise:15, hpf:30, cutoff:40, reso:30, fEnvAmt:20, fA:55, fS:65, fR:65, aA:60, aS:85, aR:70, lfoRate:25, lfoFilter:25, reverb:75, crush:10 } },
+  ]},
+  { genre:"BREAKS '93", patches:[
+    { id:"br1", name:"REESE", tag:"dark menace",
+      note:"Detuned saws fighting inside a dark filter. Slow CUTOFF rides = menace.",
+      v:{ o1Wave:0, o2Wave:0, o2Tune:58, mixO1:100, mixO2:100, mixSub:30, cutoff:26, reso:20, fEnvAmt:15, fS:70, aA:5, aS:85, aR:20 } },
+    { id:"br2", name:"WOBBLE", tag:"lfo filter",
+      note:"LFO RATE is the tempo of the wobble - sync it by ear against the break.",
+      v:{ o1Wave:50, mixO1:100, mixSub:50, cutoff:30, reso:50, lfoRate:40, lfoFilter:80, aS:85, aR:15 } },
+    { id:"br3", name:"HOOVER", tag:"rave siren",
+      note:"A touch of LFO to PITCH gives the mean detune growl. Push OSC 2 TUNE wider for chaos.",
+      v:{ o1Wave:0, o2Wave:0, o2Tune:62, o2Color:60, mixO1:95, mixO2:95, mixSub:35, cutoff:55, reso:45, fEnvAmt:55, fA:25, fD:55, fS:30, fR:40, aA:5, aS:70, aR:35, lfoPitch:12, lfoRate:55, reverb:30, delay:25, crush:15 } },
+    { id:"br4", name:"ELECTRO LEAD", tag:"8-bit attitude",
+      note:"CRUSH forward. Play it like a talkbox line - short phrases, lots of space.",
+      v:{ o1Wave:50, o1Color:30, mixO1:100, mixSub:20, cutoff:60, reso:35, fEnvAmt:40, fD:30, fS:20, aD:35, aS:45, aR:12, crush:45, delay:30 } },
+  ]},
+  { genre:"JUNGLE / DNB '95", patches:[
+    { id:"jd1", name:"808 SUB", tag:"long low",
+      note:"Long boomy fundamental under chopped breaks. One note can run four bars.",
+      v:{ o1Wave:100, mixO1:40, mixSub:100, cutoff:16, reso:5, fS:100, aD:60, aS:70, aR:45, pitchEnv:68, pitchD:18 } },
+    { id:"jd2", name:"AMEN GROWL", tag:"mid bass",
+      note:"Mid-range trouble. LFO speed against the break's chop is the whole game.",
+      v:{ o1Wave:50, o2Wave:0, o2Tune:52, mixO1:90, mixO2:60, mixSub:40, cutoff:34, reso:45, fEnvAmt:30, lfoRate:35, lfoFilter:45, fS:60, aS:80, aR:15, crush:30 } },
+    { id:"jd3", name:"LIQUID PAD", tag:"blue sky air",
+      note:"Atmospheric jungle's daylight. Float it over the chaos at half volume.",
+      v:{ o1Wave:0, o2Wave:100, o2Tune:54, o2Color:40, mixO1:70, mixO2:75, mixNoise:8, hpf:25, cutoff:58, reso:12, fA:65, fS:80, fR:70, aA:70, aS:90, aR:80, lfoRate:20, lfoFilter:10, reverb:80, delay:40 } },
+    { id:"jd4", name:"TIMESTRETCH", tag:"fx smear",
+      note:"Grainy smear like an over-stretched sample. Drop it into transitions.",
+      v:{ o1Wave:100, mixO1:25, mixNoise:85, hpf:35, cutoff:60, reso:70, fEnvAmt:40, lfoRate:75, lfoFilter:55, lfoWave:80, fA:40, fS:70, fR:60, aA:30, aS:80, aR:60, reverb:50, delay:45, crush:35 } },
+  ]},
+  { genre:"TRANCE '96", patches:[
+    { id:"tr1", name:"SUPERSAW", tag:"main room",
+      note:"Two saws pushed wide, big reverb and delay. Raise HPF if it muddies the mix.",
+      v:{ o1Wave:0, o2Wave:0, o2Tune:60, o2Color:30, mixO1:95, mixO2:95, mixSub:20, mixNoise:8, cutoff:70, reso:15, fEnvAmt:20, fA:10, fD:50, fS:70, fR:45, aA:5, aD:50, aS:80, aR:45, reverb:55, delay:45 } },
+    { id:"tr2", name:"PLUCK", tag:"arp fuel",
+      note:"All in the delay. Sustain stays at zero - the echoes do the arpeggio's work.",
+      v:{ o1Wave:0, mixO1:100, mixSub:15, cutoff:45, reso:30, fEnvAmt:65, fD:25, fR:15, aD:30, aR:20, delay:60, reverb:30 } },
+    { id:"tr3", name:"GATE PAD", tag:"wide bed",
+      note:"A bed for gating - chop it with the TR-8's sidechain or ride AMP A by hand.",
+      v:{ o1Wave:0, o2Wave:0, o2Tune:56, mixO1:85, mixO2:85, hpf:25, cutoff:50, reso:18, fEnvAmt:15, fA:50, fS:80, fR:60, aA:40, aS:90, aR:55, lfoRate:45, lfoFilter:15, reverb:65, delay:40 } },
+    { id:"tr4", name:"ROLLING BASS", tag:"offbeat 16ths",
+      note:"Tight and even. Keep release short so fast notes do not smear into each other.",
+      v:{ o1Wave:0, mixO1:100, mixSub:70, cutoff:30, reso:25, fEnvAmt:45, fD:28, fS:10, fR:10, aD:35, aS:40, aR:8 } },
+  ]},
+  { genre:"BIG BEAT '97", patches:[
+    { id:"bb1", name:"PUNK LEAD", tag:"block rockin",
+      note:"Loud, rude, slightly broken. If it sounds polite, add CRUSH.",
+      v:{ o1Wave:0, o2Wave:50, o2Tune:55, mixO1:100, mixO2:70, cutoff:64, reso:40, fEnvAmt:45, fD:40, fS:40, aD:45, aS:70, aR:15, crush:50, delay:25 } },
+    { id:"bb2", name:"FUNK FILTER BASS", tag:"wah groove",
+      note:"Auto-wah funk. Set LFO RATE just off the groove so it breathes.",
+      v:{ o1Wave:0, mixO1:100, mixSub:45, cutoff:38, reso:50, fEnvAmt:35, lfoRate:30, lfoFilter:40, fD:35, fS:30, aD:40, aS:60, aR:12 } },
+    { id:"bb3", name:"SIREN HOOK", tag:"one-note hook",
+      note:"An annoying noise, deployed with total confidence, becomes a hook.",
+      v:{ o1Wave:50, mixO1:90, cutoff:55, reso:65, fEnvAmt:30, lfoRate:45, lfoPitch:25, fS:70, aS:80, aR:25, delay:40, crush:20 } },
+  ]},
+  { genre:"TRIP-HOP '97", patches:[
+    { id:"th1", name:"BRISTOL BASS", tag:"slow menace",
+      note:"Half-speed dread. Leave space; the silence between notes is doing work.",
+      v:{ o1Wave:0, mixO1:85, mixSub:75, cutoff:24, reso:15, fEnvAmt:25, fD:50, fS:40, aA:5, aD:60, aS:70, aR:30 } },
+    { id:"th2", name:"SMOKED KEYS", tag:"dusty rhodes",
+      note:"Rhodes through a pawn-shop amp. CRUSH is the dust on the needle.",
+      v:{ o1Wave:100, o1Color:30, mixO1:90, cutoff:40, reso:15, fEnvAmt:20, fD:55, fS:35, fR:40, aD:60, aS:50, aR:45, reverb:35, crush:18, delay:20 } },
+    { id:"th3", name:"THEREMIN", tag:"eerie lead",
+      note:"Slow vibrato, long notes, hardware portamento up. Haunted lounge.",
+      v:{ o1Wave:100, mixO1:95, cutoff:70, reso:10, lfoRate:35, lfoPitch:15, fS:90, aA:20, aS:90, aR:40, reverb:55, delay:30 } },
+    { id:"th4", name:"TAPE PAD", tag:"warped bed",
+      note:"Slightly seasick, like a stretched cassette. The flat OSC 2 is deliberate.",
+      v:{ o1Wave:100, o2Wave:100, o2Tune:47, mixO1:75, mixO2:75, cutoff:34, reso:10, lfoRate:22, lfoPitch:8, lfoFilter:12, fA:55, fS:75, fR:60, aA:55, aS:85, aR:65, reverb:60, crush:15 } },
+  ]},
+  { genre:"IDM '99", patches:[
+    { id:"id1", name:"BRAINDANCE PAD", tag:"sad machine",
+      note:"Beautiful and broken at once. Write the chords sad; the synth does the rest.",
+      v:{ o1Wave:0, o2Wave:100, o2Tune:56, o2Color:50, mixO1:70, mixO2:80, cutoff:48, reso:25, fA:45, fS:75, fR:65, aA:40, aS:85, aR:70, lfoRate:15, lfoFilter:10, reverb:65, delay:35, crush:8 } },
+    { id:"id2", name:"GLITCH BLIP", tag:"micro hit",
+      note:"A single grain of sound. Sequence it in odd time and wrong places.",
+      v:{ o1Wave:50, mixO1:100, cutoff:75, reso:55, fEnvAmt:50, fD:8, aD:8, aR:5, crush:55, delay:45 } },
+    { id:"id3", name:"BENT LEAD", tag:"detune drift",
+      note:"A melody that will not sit still. The pitch drift is the emotion.",
+      v:{ o1Wave:100, o1Color:55, mixO1:95, cutoff:62, reso:30, fEnvAmt:25, lfoRate:28, lfoPitch:20, fS:70, aA:10, aS:80, aR:30, delay:40, reverb:30, crush:12 } },
+    { id:"id4", name:"MODEM NOISE", tag:"data fx",
+      note:"Dial-up in a synth. Burst it between phrases like interference.",
+      v:{ o1Wave:50, o1Color:70, mixO1:55, mixNoise:60, hpf:50, cutoff:72, reso:65, lfoRate:85, lfoFilter:60, lfoPitch:30, fS:70, aS:75, aR:20, crush:40, delay:30, ring:100, lfoWave:80 } },
+  ]},
+  { genre:"ELECTROCLASH '01", patches:[
+    { id:"ec1", name:"SLEAZE BASS", tag:"raw saw",
+      note:"Deliberately cheap. Do not polish it - the rough edge is the fashion.",
+      v:{ o1Wave:0, mixO1:100, mixSub:35, cutoff:48, reso:35, fEnvAmt:40, fD:30, fS:35, aD:40, aS:65, aR:10, crush:22 } },
+    { id:"ec2", name:"COLD LEAD", tag:"deadpan hook",
+      note:"Play it flat and bored. Three notes maximum; attitude does the melody.",
+      v:{ o1Wave:50, mixO1:100, cutoff:60, reso:25, fEnvAmt:30, fD:35, fS:40, aD:40, aS:70, aR:15, delay:30 } },
+    { id:"ec3", name:"NEON STRUT PAD", tag:"night gloss",
+      note:"Glossy but cold. Keep it thin with HPF so the bass stays filthy.",
+      v:{ o1Wave:0, o2Wave:50, o2Tune:55, mixO1:75, mixO2:70, hpf:22, cutoff:52, reso:20, fA:40, fS:70, fR:50, aA:35, aS:85, aR:50, reverb:45, delay:25 } },
+  ]},
+  { genre:"ELECTRO HOUSE '06", patches:[
+    { id:"eh1", name:"CROSSED BASS", tag:"french grit",
+      note:"Compressed French dirt. CRUSH high, then automate CUTOFF like a DJ filter.",
+      v:{ o1Wave:0, o2Wave:50, o2Tune:57, mixO1:95, mixO2:85, mixSub:45, cutoff:42, reso:45, fEnvAmt:50, fD:35, fS:25, aD:40, aS:60, aR:10, crush:55, lfoRate:25, lfoFilter:20 } },
+    { id:"eh2", name:"BLOG LEAD", tag:"big + brash",
+      note:"MySpace-era main riff. Bright, proud, borderline obnoxious - hold nothing back.",
+      v:{ o1Wave:0, o2Wave:0, o2Tune:59, mixO1:100, mixO2:95, cutoff:74, reso:38, fEnvAmt:35, fD:40, fS:55, aD:45, aS:75, aR:20, delay:30, reverb:25 } },
+    { id:"eh3", name:"FIDGET WOB", tag:"talky bass",
+      note:"Choppy vowel bass. Retrigger short notes against the LFO for the stutter.",
+      v:{ o1Wave:50, mixO1:100, mixSub:40, cutoff:36, reso:60, lfoRate:50, lfoFilter:65, fS:60, aS:75, aR:10, crush:25 } },
+  ]},
+  { genre:"MINIMAL '06", patches:[
+    { id:"mn1", name:"CLICK BLIP", tag:"tiny hit",
+      note:"Almost nothing, repeated until it hypnotises. Resist adding more.",
+      v:{ o1Wave:100, mixO1:100, cutoff:68, reso:30, fEnvAmt:35, fD:10, aD:10, aR:6, delay:55, reverb:10 } },
+    { id:"mn2", name:"WARM MICRO SUB", tag:"round low",
+      note:"Soft-spoken low end. Groove comes from note placement, not the sound.",
+      v:{ o1Wave:100, mixO1:45, mixSub:95, cutoff:17, reso:5, fS:100, aA:5, aD:50, aS:75, aR:15 } },
+    { id:"mn3", name:"SPARSE STAB", tag:"dry jab",
+      note:"Bone dry, oddly placed. The off-grid timing is the funk.",
+      v:{ o1Wave:50, o2Wave:100, o2Tune:52, mixO1:80, mixO2:55, cutoff:46, reso:28, fEnvAmt:45, fD:25, fR:12, aD:30, aS:5, aR:15, delay:35 } },
+    { id:"mn4", name:"DRONE BED", tag:"grey glue",
+      note:"Barely-there glue under the drums. If you notice it, turn it down.",
+      v:{ o1Wave:100, o2Wave:100, o2Tune:51, mixO1:60, mixO2:60, hpf:15, cutoff:30, reso:15, fS:90, aA:60, aS:95, aR:70, lfoRate:10, lfoFilter:8, reverb:40 } },
+  ]},
+  { genre:"DUBSTEP '08", patches:[
+    { id:"ds1", name:"140 SUB", tag:"half-step low",
+      note:"Pure weight at 140. Write half-time; let notes hang across the snare.",
+      v:{ o1Wave:100, mixO1:35, mixSub:100, cutoff:15, fS:100, aD:55, aS:85, aR:30, subType:100 } },
+    { id:"ds2", name:"MID GROWL", tag:"talking mids",
+      note:"The yoi-yoi zone. LFO RATE = wobble speed; retrigger for triplets.",
+      v:{ o1Wave:50, o1Color:55, o2Wave:50, o2Tune:53, mixO1:90, mixO2:65, cutoff:38, reso:58, lfoRate:38, lfoFilter:70, fS:65, aS:80, aR:12, crush:40 } },
+    { id:"ds3", name:"VOID PAD", tag:"cavern air",
+      note:"Empty warehouse air between bass hits. Space is the instrument.",
+      v:{ o1Wave:0, o2Wave:100, o2Tune:53, mixO1:65, mixO2:70, mixNoise:10, hpf:20, cutoff:42, reso:18, fA:60, fS:75, fR:70, aA:60, aS:90, aR:75, reverb:85, delay:40 } },
+  ]},
+];
+
+// ---------- State & persistence (localStorage) ----------
+const LS_PATCHES = "s1.patches";
+const LS_SESSION = "s1.session";
+const firstP = LIBRARY[0].patches[0];
+const state = {
+  values: Object.assign({}, ZERO, firstP.v),
+  current: { kind:"factory", id:firstP.id, name:firstP.name, note:firstP.note, base:Object.assign({}, ZERO, firstP.v) },
+  genre: LIBRARY[0].genre,
+  userPatches: [],
+  confirmDel: null,
+};
+try { const p = localStorage.getItem(LS_PATCHES); if (p) state.userPatches = JSON.parse(p); } catch(e) {}
+try {
+  const s = localStorage.getItem(LS_SESSION);
+  if (s) {
+    const ss = JSON.parse(s);
+    if (ss.values) state.values = Object.assign({}, ZERO, ss.values);
+    if (ss.current) state.current = ss.current;
+    if (ss.genre) state.genre = ss.genre;
+  }
+} catch(e) {}
+
+let sessT = null;
+function saveSession() {
+  clearTimeout(sessT);
+  sessT = setTimeout(() => {
+    try { localStorage.setItem(LS_SESSION, JSON.stringify({ values:state.values, current:state.current, genre:state.genre })); } catch(e) {}
+  }, 400);
+}
+function savePatches() {
+  try { localStorage.setItem(LS_PATCHES, JSON.stringify(state.userPatches)); }
+  catch(e) { flash("Couldn't save \u2014 storage unavailable"); }
+}
+
+// ---------- Knob geometry ----------
+const NS = "http://www.w3.org/2000/svg";
+function polar(cx, cy, r, deg) {
+  const rad = (deg - 90) * Math.PI / 180;
+  return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
+}
+function arc(cx, cy, r, a0, a1) {
+  const p0 = polar(cx, cy, r, a0), p1 = polar(cx, cy, r, a1);
+  return "M " + p0[0] + " " + p0[1] + " A " + r + " " + r + " 0 " + (a1 - a0 > 180 ? 1 : 0) + " 1 " + p1[0] + " " + p1[1];
+}
+const clamp = v => Math.max(0, Math.min(100, v));
+function snap(pk, v) {
+  const steps = STEPPED[pk];
+  if (!steps) return v;
+  const step = 100 / (steps.length - 1);
+  return Math.round(v / step) * step;
+}
+
+// ---------- Knob DOM ----------
+const knobEls = {};
+function svgEl(tag, attrs, cls) {
+  const el = document.createElementNS(NS, tag);
+  for (const k in attrs) el.setAttribute(k, attrs[k]);
+  if (cls) el.setAttribute("class", cls);
+  return el;
+}
+function makeKnob(pk) {
+  const steps = STEPPED[pk];
+  const size = BIG.has(pk) ? 64 : 48;
+  const c = size / 2, r = c - 4;
+  const wrap = document.createElement("div"); wrap.className = "knob";
+  const svg = svgEl("svg", { width:size, height:size, role:"slider", tabindex:0,
+    "aria-label":LABELS[pk], "aria-valuemin":0, "aria-valuemax":100 }, "knob-svg");
+  const track = svgEl("path", { d:arc(c,c,r,-135,135) }, "k-track");
+  const fill  = svgEl("path", {}, "k-fill");
+  const body  = svgEl("circle", { cx:c, cy:c, r:r-5 }, "k-body");
+  const ptr   = svgEl("line", { x1:c, y1:c }, "k-pointer");
+  svg.append(track, fill, body, ptr);
+  const lab = document.createElement("div"); lab.className = "k-label"; lab.textContent = LABELS[pk];
+  const val = document.createElement("div"); val.className = "k-value";
+  wrap.append(svg, lab, val);
+  knobEls[pk] = { fill, ptr, val, svg, c, r, steps };
+
+  let drag = null, lp = null;
+  svg.addEventListener("pointerdown", e => {
+    svg.setPointerCapture(e.pointerId);
+    drag = { y:e.clientY, v:state.values[pk] };
+    clearTimeout(lp);
+    lp = setTimeout(() => {
+      if (drag) {
+        setValue(pk, drag.v); // undo any micro-jitter from the held finger
+        drag = null;
+        showInfo(pk);
+      }
+    }, 500);
+    e.preventDefault();
+  });
+  svg.addEventListener("pointermove", e => {
+    if (!drag) return;
+    const dy = drag.y - e.clientY;
+    if (Math.abs(dy) > 5) clearTimeout(lp); // it's a turn, not a hold
+    setValue(pk, snap(pk, clamp(drag.v + dy * 0.55)));
+  });
+  const end = () => { drag = null; clearTimeout(lp); };
+  svg.addEventListener("contextmenu", e => e.preventDefault());
+  svg.addEventListener("pointerup", end);
+  svg.addEventListener("pointercancel", end);
+  svg.addEventListener("keydown", e => {
+    const d = steps ? 100 / (steps.length - 1) : 5;
+    if (e.key === "ArrowUp" || e.key === "ArrowRight") { e.preventDefault(); setValue(pk, snap(pk, clamp(state.values[pk] + d))); }
+    if (e.key === "ArrowDown" || e.key === "ArrowLeft") { e.preventDefault(); setValue(pk, snap(pk, clamp(state.values[pk] - d))); }
+    if (e.key === "i" || e.key === "?") { e.preventDefault(); showInfo(pk); }
+  });
+  updateKnob(pk);
+  return wrap;
+}
+function updateKnob(pk) {
+  const k = knobEls[pk], v = state.values[pk];
+  const angle = -135 + v / 100 * 270;
+  if (v > 0.5) { k.fill.setAttribute("d", arc(k.c, k.c, k.r, -135, angle)); k.fill.style.display = ""; }
+  else k.fill.style.display = "none";
+  const p = polar(k.c, k.c, k.r - 7, angle);
+  k.ptr.setAttribute("x2", p[0]); k.ptr.setAttribute("y2", p[1]);
+  k.val.textContent = k.steps
+    ? k.steps[Math.round(v / (100 / (k.steps.length - 1)))]
+    : BIPOLAR.has(pk)
+      ? (Math.round(v) - 50 > 0 ? "+" : "") + (Math.round(v) - 50)
+      : Math.round(v);
+  k.svg.setAttribute("aria-valuenow", Math.round(v));
+  k.svg.setAttribute("aria-valuetext", String(k.val.textContent));
+}
+function setValue(pk, v) {
+  state.values[pk] = v;
+  updateKnob(pk);
+  refreshEdited();
+  saveSession();
+}
+
+// ---------- Edited tracking ----------
+function isEdited() {
+  const base = state.current.base || {};
+  return Object.keys(LABELS).some(k => Math.round(state.values[k]) !== Math.round(base[k] || 0));
+}
+let lastEdited = null;
+function refreshEdited() {
+  const e = isEdited();
+  if (e === lastEdited) return;
+  lastEdited = e;
+  document.getElementById("editedTag").style.display = e ? "" : "none";
+  renderPlist();
+}
+
+// ---------- Loading & rendering ----------
+function loadPatch(p, kind) {
+  state.values = Object.assign({}, ZERO, p.v);
+  state.current = { kind, id:p.id, name:p.name, note:p.note || "", base:Object.assign({}, ZERO, p.v) };
+  state.confirmDel = null;
+  Object.keys(LABELS).forEach(updateKnob);
+  lastEdited = null;
+  renderNote(); renderStrip(); refreshEdited(); saveSession();
+}
+function renderTabs() {
+  const el = document.getElementById("gtabs");
+  el.innerHTML = "";
+  LIBRARY.forEach(g => {
+    const b = document.createElement("button");
+    b.className = "gtab" + (state.genre === g.genre ? " on" : "");
+    b.textContent = g.genre;
+    b.onclick = () => { state.genre = g.genre; renderTabs(); renderStrip(); saveSession(); };
+    el.append(b);
+  });
+}
+function renderStrip() {
+  const el = document.getElementById("strip");
+  el.innerHTML = "";
+  const group = LIBRARY.find(g => g.genre === state.genre) || LIBRARY[0];
+  group.patches.forEach(p => {
+    const b = document.createElement("button");
+    b.className = "chip" + (state.current.kind === "factory" && state.current.id === p.id ? " on" : "");
+    const nm = document.createTextNode(p.name);
+    const sm = document.createElement("small"); sm.textContent = p.tag;
+    b.append(nm, sm);
+    b.onclick = () => loadPatch(p, "factory");
+    el.append(b);
+  });
+}
+function renderNote() {
+  const note = document.getElementById("note");
+  note.className = "note" + (state.current.kind === "user" ? " user-note" : "");
+  document.getElementById("noteTxt").textContent = state.current.note || "Your saved starting point.";
+}
+function renderPlist() {
+  const wrap = document.getElementById("plistWrap");
+  wrap.innerHTML = "";
+  const list = document.createElement("div"); list.className = "plist";
+  const top = document.createElement("div"); top.className = "plist-top";
+  const hd = document.createElement("span"); hd.className = "plist-hd"; hd.textContent = "YOUR PATCHES";
+  top.append(hd);
+  if (state.userPatches.length) {
+    const ex = document.createElement("button"); ex.className = "tbtn"; ex.textContent = "EXPORT ALL";
+    ex.onclick = () => exportPatches(state.userPatches, "system1-collection");
+    top.append(ex);
+  }
+  const im = document.createElement("button"); im.className = "tbtn"; im.textContent = "IMPORT";
+  im.onclick = () => document.getElementById("importFile").click();
+  top.append(im);
+  list.append(top);
+  if (!state.userPatches.length) {
+    const p = document.createElement("p"); p.className = "empty";
+    p.textContent = "Land on something good mid-session? Turn the knobs here to match your panel, name it, and it'll be waiting next time you play. Got an exported file or a friend's collection? IMPORT brings it in.";
+    list.append(p);
+    wrap.append(list);
+    return;
+  }
+  state.userPatches.forEach(p => {
+    const on = state.current.kind === "user" && state.current.id === p.id;
+    const row = document.createElement("div"); row.className = "prow" + (on ? " on" : "");
+    const name = document.createElement("button"); name.className = "name"; name.textContent = p.name;
+    name.onclick = () => loadPatch(p, "user");
+    row.append(name);
+    if (on) {
+      const live = document.createElement("span"); live.className = "live";
+      live.textContent = lastEdited ? "EDITING" : "LOADED";
+      row.append(live);
+    }
+    const from = document.createElement("span"); from.className = "from"; from.textContent = p.note || "";
+    row.append(from);
+    const exp = document.createElement("button"); exp.className = "del"; exp.textContent = "EXP";
+    exp.onclick = () => exportPatches([p], p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") || "patch");
+    row.append(exp);
+    const del = document.createElement("button");
+    del.className = "del" + (state.confirmDel === p.id ? " arm" : "");
+    del.textContent = state.confirmDel === p.id ? "SURE?" : "DEL";
+    del.onclick = () => {
+      if (state.confirmDel === p.id) {
+        state.userPatches = state.userPatches.filter(x => x.id !== p.id);
+        state.confirmDel = null;
+        savePatches(); renderPlist();
+      } else { state.confirmDel = p.id; renderPlist(); }
+    };
+    row.append(del);
+    list.append(row);
+  });
+  wrap.append(list);
+}
+
+// ---------- Import / export ----------
+function exportPatches(patches, label) {
+  const payload = { app:"system1-patch-map", version:1, exported:new Date().toISOString(),
+    patches: patches.map(p => ({ name:p.name, note:p.note || "", v:p.v })) };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:"application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = label + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  flash("Exported " + patches.length + (patches.length === 1 ? " patch" : " patches"));
+}
+document.getElementById("importFile").addEventListener("change", function() {
+  const f = this.files && this.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = () => { doImport(String(r.result)); };
+  r.readAsText(f);
+  this.value = "";
+});
+function doImport(text) {
+  const incoming = [];
+  try {
+    const data = JSON.parse(text);
+    const arr = Array.isArray(data) ? data : data.patches;
+    if (!Array.isArray(arr)) throw new Error("bad format");
+    arr.forEach(p => {
+      if (!p || typeof p.name !== "string" || typeof p.v !== "object" || p.v === null) return;
+      const v = {};
+      Object.keys(LABELS).forEach(k => {
+        const n = Number(p.v[k]);
+        v[k] = isFinite(n) ? clamp(n) : (ZERO[k] || 0);
+      });
+      incoming.push({ name:p.name.toUpperCase().slice(0,24),
+        note: typeof p.note === "string" ? p.note.slice(0,80) : "Imported", v });
+    });
+  } catch(e) { flash("Couldn't read that file"); return; }
+  if (!incoming.length) { flash("No patches found in that file"); return; }
+  let added = 0, skipped = 0;
+  incoming.forEach(inc => {
+    const twin = state.userPatches.find(p => p.name === inc.name &&
+      Object.keys(LABELS).every(k => Math.round(p.v[k] || 0) === Math.round(inc.v[k] || 0)));
+    if (twin) { skipped++; return; }
+    let name = inc.name, n = 2;
+    while (state.userPatches.some(p => p.name === name)) name = inc.name + " (" + (n++) + ")";
+    state.userPatches.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2,5),
+      name, note:inc.note, v:inc.v });
+    added++;
+  });
+  savePatches(); renderPlist();
+  flash(added + " imported" + (skipped ? ", " + skipped + " already saved" : ""));
+}
+
+// ---------- Save bar ----------
+const nameInput = document.getElementById("saveName");
+const saveBtn = document.getElementById("saveBtn");
+function doSave() {
+  const name = nameInput.value.trim().toUpperCase();
+  if (!name) return;
+  const patch = {
+    id: Date.now().toString(36),
+    name,
+    v: Object.assign({}, state.values),
+    note: "Saved from " + state.current.name + (isEdited() ? " (edited)" : ""),
+  };
+  state.userPatches = state.userPatches.filter(p => p.name !== name).concat([patch]);
+  savePatches();
+  nameInput.value = "";
+  state.current = { kind:"user", id:patch.id, name:patch.name, note:patch.note, base:Object.assign({}, patch.v) };
+  lastEdited = null;
+  renderNote(); renderStrip(); refreshEdited(); saveSession();
+  flash(name + " saved");
+}
+saveBtn.onclick = doSave;
+nameInput.addEventListener("keydown", e => { if (e.key === "Enter") doSave(); });
+
+function showInfo(pk) {
+  const sec = SECTIONS.find(s => s.params.indexOf(pk) >= 0);
+  document.getElementById("sheetSec").textContent = sec ? sec.name : "";
+  document.getElementById("sheetName").textContent = LABELS[pk];
+  document.getElementById("sheetTxt").textContent = INFO[pk] || "";
+  document.getElementById("sheetPairs").innerHTML = "";
+  document.getElementById("scrim").style.display = "block";
+  document.getElementById("sheet").style.display = "block";
+}
+function showSecInfo(name) {
+  const m = SECTION_META[name];
+  if (!m) return;
+  document.getElementById("sheetSec").textContent = m.tag.toUpperCase();
+  document.getElementById("sheetName").textContent = name;
+  document.getElementById("sheetTxt").textContent = m.info;
+  const pairs = document.getElementById("sheetPairs");
+  pairs.innerHTML = "";
+  const hd = document.createElement("div"); hd.className = "pair-hd"; hd.textContent = "WORKS TOGETHER";
+  pairs.append(hd);
+  m.pairs.forEach(p => {
+    const row = document.createElement("div"); row.className = "pair";
+    const b = document.createElement("b"); b.textContent = p.k;
+    const sp = document.createElement("span"); sp.textContent = p.t;
+    row.append(b, sp);
+    pairs.append(row);
+  });
+  document.getElementById("scrim").style.display = "block";
+  document.getElementById("sheet").style.display = "block";
+}
+function hideInfo() {
+  document.getElementById("scrim").style.display = "none";
+  document.getElementById("sheet").style.display = "none";
+}
+document.getElementById("scrim").addEventListener("click", hideInfo);
+document.getElementById("sheetClose").addEventListener("click", hideInfo);
+
+let flashT = null;
+function flash(msg) {
+  const el = document.getElementById("flash");
+  el.textContent = msg; el.style.display = "block";
+  clearTimeout(flashT);
+  flashT = setTimeout(() => { el.style.display = "none"; }, 2000);
+}
+
+// ---------- Build ----------
+const board = document.getElementById("board");
+SECTIONS.forEach(sec => {
+  const s = document.createElement("div"); s.className = "sec";
+  const head = document.createElement("button"); head.className = "sec-head";
+  const nm = document.createElement("div"); nm.className = "sec-name"; nm.textContent = sec.name;
+  const tg = document.createElement("div"); tg.className = "sec-tag";
+  tg.textContent = SECTION_META[sec.name].tag;
+  head.append(nm, tg);
+  head.onclick = () => showSecInfo(sec.name);
+  const ks = document.createElement("div"); ks.className = "sec-knobs";
+  sec.params.forEach(pk => ks.append(makeKnob(pk)));
+  s.append(head, ks);
+  board.append(s);
+});
+renderTabs(); renderStrip(); renderNote(); refreshEdited();
+if (lastEdited === null) { lastEdited = isEdited(); document.getElementById("editedTag").style.display = lastEdited ? "" : "none"; renderPlist(); }
+
+// ---------- PWA service worker ----------
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  navigator.serviceWorker.register("./sw.js").catch(() => {});
+}
+</script>
+</body>
+</html>
