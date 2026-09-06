@@ -91,6 +91,7 @@ body { background:var(--bg); }
   font-weight:700; font-size:12px; letter-spacing:.12em; padding:10px 16px;
   border-radius:3px; cursor:pointer; }
 .btn:disabled { opacity:.35; cursor:default; }
+.btn.ghost { background:none; border:1px solid var(--line2); color:var(--mut); }
 
 .plist { margin-top:12px; display:flex; flex-direction:column; gap:6px; }
 .plist-top { display:flex; align-items:center; gap:8px; }
@@ -112,29 +113,37 @@ body { background:var(--bg); }
   font-family:var(--mono); font-size:10px; padding:3px 8px; border-radius:3px; cursor:pointer; flex:0 0 auto; }
 .prow .del.arm { border-color:#ff5d5d; color:#ff5d5d; }
 
-.btn.ghost { background:none; border:1px solid var(--line2); color:var(--mut); }
+.xfer { margin-top:12px; background:var(--panel); border:1px solid var(--line2);
+  border-radius:4px; padding:12px; }
+.xfer-hd { font-size:10px; font-weight:600; letter-spacing:.2em; color:var(--green); margin-bottom:6px; }
+.xfer-p { font-family:var(--mono); font-size:10.5px; color:var(--mut); line-height:1.5; margin-bottom:8px; }
+.xfer-ta { width:100%; height:110px; background:var(--bg); border:1px solid var(--line2);
+  color:var(--text); font-family:var(--mono); font-size:10px; padding:8px; border-radius:3px; resize:vertical; }
+.xfer-file { display:block; margin-bottom:8px; font-family:var(--mono); font-size:11px; color:var(--mut); max-width:100%; }
+.xfer-btns { display:flex; gap:8px; margin-top:8px; }
+
 .scrim { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:40; }
 .sheet { position:fixed; left:0; right:0; bottom:0; z-index:41; background:var(--panel);
   border-top:2px solid var(--green);
   padding:16px 18px calc(24px + env(safe-area-inset-bottom));
   max-width:760px; margin:0 auto; box-shadow:0 -8px 30px rgba(0,0,0,.6);
   max-height:75vh; overflow-y:auto; }
-.pair-hd { font-size:9px; font-weight:600; letter-spacing:.22em; color:var(--amber);
-  margin-top:12px; margin-bottom:2px; }
-.pair { border-top:1px solid var(--line); padding:7px 0; }
-.pair b { display:block; font-size:11px; font-weight:600; letter-spacing:.08em;
-  color:var(--green); margin-bottom:1px; }
-.pair span { font-family:var(--mono); font-size:11px; line-height:1.5; color:var(--text); }
 .sheet-sec { font-family:var(--mono); font-size:9px; letter-spacing:.24em; color:var(--green-dim); }
 .sheet-name { font-size:18px; font-weight:700; letter-spacing:.12em; color:var(--green); margin:2px 0 8px; }
 .sheet-txt { font-family:var(--mono); font-size:12px; line-height:1.65; color:var(--text); }
 .sheet .btn { margin-top:12px; }
+.pair-hd { font-size:9px; font-weight:600; letter-spacing:.22em; color:var(--amber);
+  margin-top:12px; margin-bottom:2px; }
+.pair { border-top:1px solid var(--line); padding:7px 0; }
+.pair b { display:block; font-size:11px; font-weight:600; letter-spacing:.08em; color:var(--green); margin-bottom:1px; }
+.pair span { font-family:var(--mono); font-size:11px; line-height:1.5; color:var(--text); }
+
 .flash { position:fixed; bottom:calc(18px + env(safe-area-inset-bottom)); left:50%; transform:translateX(-50%);
   background:var(--green); color:#04140c; font-weight:700; font-size:12px;
   letter-spacing:.1em; padding:9px 16px; border-radius:3px; display:none; }
 .empty { font-family:var(--mono); font-size:11px; color:var(--mut); margin-top:12px; line-height:1.6; }
 @media (prefers-reduced-motion:no-preference) {
-  .chip, .gtab, .btn, .prow { transition:border-color .15s, color .15s, opacity .15s, box-shadow .15s; }
+  .chip, .gtab, .btn, .prow, .tbtn { transition:border-color .15s, color .15s, opacity .15s, box-shadow .15s; }
 }
 </style>
 </head>
@@ -157,6 +166,7 @@ body { background:var(--bg); }
     <button class="btn" id="saveBtn">SAVE</button>
   </div>
   <div id="plistWrap"></div>
+  <div id="xferWrap"></div>
   <input type="file" id="importFile" accept=".json,application/json,text/plain" style="display:none">
   <div class="scrim" id="scrim" style="display:none"></div>
   <div class="sheet" id="sheet" style="display:none" role="dialog">
@@ -171,10 +181,18 @@ body { background:var(--bg); }
 
 <script>
 "use strict";
-// ---------- Panel definition ----------
+/* ============================================================
+   DATA — panel definition, patch library, info text, section
+   guides. Kept in sync by hand with system1-patch-map.jsx.
+   See README.md §6 before editing.
+   ============================================================ */
+
 const WAVES = ["SAW", "SQR", "TRI"];
+
 const LFO_WAVES = ["SIN", "TRI", "SAW", "SQR", "S&H", "RND"];
+
 const RANGES = ["64", "32", "16", "8", "4", "2"];
+
 const SWITCH = ["OFF", "ON"];
 
 const SECTIONS = [
@@ -207,10 +225,13 @@ const STEPPED = {
   ring: SWITCH, sync: SWITCH,
   lpfType: ["12dB", "24dB"], subType: ["-1OCT", "-2OCT"], noiseType: ["WHITE", "PINK"],
 };
+
 const BIG = new Set(["cutoff", "reso"]);
+
 const BIPOLAR = new Set(["o2Tune", "pitchEnv"]);
 
 // Panel defaults: 8' ranges, pitch env centred (off), tone open, delay time centred
+
 const ZERO = Object.assign(
   Object.fromEntries(Object.keys(LABELS).map(k => [k, 0])),
   { o1Range: 60, o2Range: 60, pitchEnv: 50, ampTone: 100, delayTime: 50 }
@@ -342,6 +363,7 @@ const SECTION_META = {
 };
 
 // ---------- Factory library ----------
+
 const LIBRARY = [
   { genre:"STARTERS", patches:[
     { id:"init", name:"INIT", tag:"blank canvas",
@@ -624,7 +646,10 @@ const LIBRARY = [
   ]},
 ];
 
-// ---------- State & persistence (localStorage) ----------
+/* ============================================================
+   APP LOGIC
+   ============================================================ */
+
 const LS_PATCHES = "s1.patches";
 const LS_SESSION = "s1.session";
 const firstP = LIBRARY[0].patches[0];
@@ -655,7 +680,7 @@ function saveSession() {
 }
 function savePatches() {
   try { localStorage.setItem(LS_PATCHES, JSON.stringify(state.userPatches)); }
-  catch(e) { flash("Couldn't save \u2014 storage unavailable"); }
+  catch(e) { flash("Couldn't save — storage unavailable"); }
 }
 
 // ---------- Knob geometry ----------
@@ -722,9 +747,9 @@ function makeKnob(pk) {
     setValue(pk, snap(pk, clamp(drag.v + dy * 0.55)));
   });
   const end = () => { drag = null; clearTimeout(lp); };
-  svg.addEventListener("contextmenu", e => e.preventDefault());
   svg.addEventListener("pointerup", end);
   svg.addEventListener("pointercancel", end);
+  svg.addEventListener("contextmenu", e => e.preventDefault());
   svg.addEventListener("keydown", e => {
     const d = steps ? 100 / (steps.length - 1) : 5;
     if (e.key === "ArrowUp" || e.key === "ArrowRight") { e.preventDefault(); setValue(pk, snap(pk, clamp(state.values[pk] + d))); }
@@ -940,6 +965,15 @@ function doSave() {
 saveBtn.onclick = doSave;
 nameInput.addEventListener("keydown", e => { if (e.key === "Enter") doSave(); });
 
+let flashT = null;
+function flash(msg) {
+  const el = document.getElementById("flash");
+  el.textContent = msg; el.style.display = "block";
+  clearTimeout(flashT);
+  flashT = setTimeout(() => { el.style.display = "none"; }, 2000);
+}
+
+// ---------- Info sheet (knob detail + section guide) ----------
 function showInfo(pk) {
   const sec = SECTIONS.find(s => s.params.indexOf(pk) >= 0);
   document.getElementById("sheetSec").textContent = sec ? sec.name : "";
@@ -975,14 +1009,6 @@ function hideInfo() {
 }
 document.getElementById("scrim").addEventListener("click", hideInfo);
 document.getElementById("sheetClose").addEventListener("click", hideInfo);
-
-let flashT = null;
-function flash(msg) {
-  const el = document.getElementById("flash");
-  el.textContent = msg; el.style.display = "block";
-  clearTimeout(flashT);
-  flashT = setTimeout(() => { el.style.display = "none"; }, 2000);
-}
 
 // ---------- Build ----------
 const board = document.getElementById("board");
